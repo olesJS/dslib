@@ -3,4 +3,7 @@ project(dslib C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(dslib main.c)
+add_executable(dslib main.c
+        ds_stack.c
+        ds_stack.h
+)
