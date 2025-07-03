@@ -1,0 +1,3 @@
+/Users/oleksii0305/Desktop/dslib/cmake-build-debug/CMakeFiles/dslib.dir
+/Users/oleksii0305/Desktop/dslib/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/oleksii0305/Desktop/dslib/cmake-build-debug/CMakeFiles/rebuild_cache.dir
