@@ -3,13 +3,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// Initializing dequeue with NULL values and allocating dynamic memory
 void initDequeue(DEQUEUE **pDequeue) {
     *pDequeue = (DEQUEUE*)malloc(sizeof(DEQUEUE));
+
     (*pDequeue)->front = NULL;
     (*pDequeue)->back = NULL;
     (*pDequeue)->size = 0;
 }
 
+// Inserting new element to the front of dequeue
 void pushFront(DEQUEUE **pDequeue, void *newInfo) {
     DEQUEUE_NODE *pNewNode = (DEQUEUE_NODE*)malloc(sizeof(DEQUEUE_NODE));
 
@@ -26,13 +29,12 @@ void pushFront(DEQUEUE **pDequeue, void *newInfo) {
 
     (*pDequeue)->front = pNewNode;
 
-    if ((*pDequeue)->back == NULL) {
-        (*pDequeue)->back = pNewNode;
-    }
+    if ((*pDequeue)->back == NULL) (*pDequeue)->back = pNewNode;
 
     (*pDequeue)->size += 1;
 }
 
+// Inserting new element to the back of dequeue
 void pushBack(DEQUEUE **pDequeue, void *newInfo) {
     DEQUEUE_NODE *pNewNode = (DEQUEUE_NODE*)malloc(sizeof(DEQUEUE_NODE));
 
@@ -49,13 +51,13 @@ void pushBack(DEQUEUE **pDequeue, void *newInfo) {
 
     (*pDequeue)->back = pNewNode;
 
-    if ((*pDequeue)->front == NULL) {
-        (*pDequeue)->front = pNewNode;
-    }
+    if ((*pDequeue)->front == NULL) (*pDequeue)->front = pNewNode;
 
     (*pDequeue)->size += 1;
 }
 
+// Deleting the front element of dequeue
+// The second parameter of this function is a custom function that prints the information part of the dequeue element
 void popFront(DEQUEUE **pDequeue, void(*printFunc)(void*)) {
     if ((*pDequeue)->front == NULL) return;
 
@@ -73,6 +75,8 @@ void popFront(DEQUEUE **pDequeue, void(*printFunc)(void*)) {
     (*pDequeue)->size -= 1;
 }
 
+// Deleting the back element of dequeue
+// The second parameter of this function is a custom function that prints the information part of the dequeue element
 void popBack(DEQUEUE **pDequeue, void(*printFunc)(void*)) {
     if ((*pDequeue)->back == NULL) return;
 
@@ -90,10 +94,12 @@ void popBack(DEQUEUE **pDequeue, void(*printFunc)(void*)) {
     (*pDequeue)->size -= 1;
 }
 
+// Getting size (number of elements) of the dequeue
 int dequeueSize(DEQUEUE **pDequeue) {
     return (*pDequeue)->size;
 }
 
+// Printing all dequeue elements with their indexes
 void printDequeue(DEQUEUE *pDequeue, void (*printFunc)(void*)) {
     DEQUEUE_NODE *pCurrentNode = pDequeue->front;
     int index = 0;
@@ -105,15 +111,34 @@ void printDequeue(DEQUEUE *pDequeue, void (*printFunc)(void*)) {
     }
 }
 
-void insertAt(DEQUEUE **pDequeue, void *newInfo, int index) {
-    if (index > ((*pDequeue)->size - 1) || index < 0) {
-        printf("\nERROR: INDEX IS OUT OF BONDS!\n");
+// Removing all dequeue elements and cleaning up dynamic memory from the dequeue
+void clearDequeue(DEQUEUE **pDequeue, void(*freeFunc)(void*)) {
+    DEQUEUE_NODE *pCurrentNode = (*pDequeue)->front;
+    DEQUEUE_NODE *pNextNode;
+
+    while (pCurrentNode != NULL) {
+        pNextNode = pCurrentNode->next;
+
+        freeFunc(pCurrentNode->info);
+        free(pCurrentNode);
+
+        pCurrentNode = pNextNode;
+    }
+
+    free(*pDequeue);
+    *pDequeue = NULL;
+}
+
+// Inserting new element to dequeue in required position (by index)
+void insertAt(DEQUEUE **pDequeue, void *newInfo, int idx) {
+    if (idx > (*pDequeue)->size || idx < 0) {
+        printf("\nERROR: INDEX IS OUT OF BOUNDS!\n");
         return;
     }
 
     DEQUEUE_NODE *pCurrentNode = (*pDequeue)->front;
 
-    for (int i = 0; i < index; i++) {
+    for (int i = 0; i < idx; i++) {
         pCurrentNode = pCurrentNode->next;
     }
 
@@ -121,6 +146,7 @@ void insertAt(DEQUEUE **pDequeue, void *newInfo, int index) {
 
     pNewNode->info = newInfo;
     pNewNode->prev = pCurrentNode->prev;
+
     pCurrentNode->prev = pNewNode;
     pNewNode->next = pCurrentNode;
 
@@ -133,15 +159,16 @@ void insertAt(DEQUEUE **pDequeue, void *newInfo, int index) {
     (*pDequeue)->size += 1;
 }
 
-void removeAt(DEQUEUE **pDequeue, int index) {
-    if (index > ((*pDequeue)->size - 1) || index < 0) {
-        printf("\nERROR: INDEX IS OUT OF BONDS!\n");
+// Deleting element by its index
+void removeAt(DEQUEUE **pDequeue, int idx) {
+    if (idx > ((*pDequeue)->size - 1) || idx < 0) {
+        printf("\nERROR: INDEX IS OUT OF BOUNDS!\n");
         return;
     }
 
     DEQUEUE_NODE *pCurrentNode = (*pDequeue)->front;
 
-    for (int i = 0; i < index; i++) {
+    for (int i = 0; i < idx; i++) {
         pCurrentNode = pCurrentNode->next;
     }
 
@@ -149,6 +176,7 @@ void removeAt(DEQUEUE **pDequeue, int index) {
         (*pDequeue)->front = pCurrentNode->next;
         free(pCurrentNode);
         pCurrentNode = NULL;
+        (*pDequeue)->size -= 1;
         return;
     }
 
@@ -156,6 +184,7 @@ void removeAt(DEQUEUE **pDequeue, int index) {
         (*pDequeue)->back = pCurrentNode->prev;
         free(pCurrentNode);
         pCurrentNode = NULL;
+        (*pDequeue)->size -= 1;
         return;
     }
 
@@ -165,4 +194,71 @@ void removeAt(DEQUEUE **pDequeue, int index) {
     pCurrentNode = NULL;
 
     (*pDequeue)->size -= 1;
+}
+
+// Reversing dequeue
+void reverseDequeue(DEQUEUE **pDequeue) {
+    DEQUEUE_NODE *pCurrentNode = (*pDequeue)->front;
+
+    while (pCurrentNode != NULL) {
+        DEQUEUE_NODE *pNextNode = pCurrentNode->next;
+        pCurrentNode->next = pCurrentNode->prev;
+        pCurrentNode->prev = pNextNode;
+
+        pCurrentNode = pNextNode;
+    }
+
+    DEQUEUE_NODE *pFrontNode = (*pDequeue)->front;
+    (*pDequeue)->front = (*pDequeue)->back;
+    (*pDequeue)->back = pFrontNode;
+}
+
+// Delete all elements containing the key value from dequeue
+// cmpFunc(void*, void*) is a custom function that returns int value different from 0 if compared elements are matching
+// Parameter "key" is the value you want to delete from dequeue
+void removeValue(DEQUEUE **pDequeue, void *key, int (*cmpFunc)(void*, void*), void(*freeFunc)(void*)) {
+    DEQUEUE_NODE *pCurrentNode = (*pDequeue)->front;
+
+    while (pCurrentNode != NULL) {
+        DEQUEUE_NODE *pNextNode = pCurrentNode->next;
+
+        if (cmpFunc(key, pCurrentNode->info)) {
+            if (pCurrentNode->prev != NULL) {
+                pCurrentNode->prev->next = pCurrentNode->next;
+            } else {
+                (*pDequeue)->front = pCurrentNode->next;
+            }
+
+            if (pCurrentNode->next != NULL) {
+                pCurrentNode->next->prev = pCurrentNode->prev;
+            } else {
+                (*pDequeue)->back = pCurrentNode->prev;
+            }
+
+            freeFunc(pCurrentNode->info);
+            free(pCurrentNode);
+
+            (*pDequeue)->size -= 1;
+        }
+
+        pCurrentNode = pNextNode;
+    }
+}
+
+// Find element by value
+// cmpFunc(void*, void*) is a custom function that returns int value different from 0 if compared elements are matching
+// Parameter "key" is the value you are looking for
+void find(DEQUEUE **pDequeue, void *key, int (*cmpFunc)(void*, void*), void (*printFunc)(void*)) {
+    DEQUEUE_NODE *pCurrentNode = (*pDequeue)->front;
+    int idx = 0;    // index of the element in dequeue
+
+    while (pCurrentNode != NULL) {
+        if (cmpFunc(key, pCurrentNode->info)) {
+            printf("\n%d. ", idx);
+            printFunc(pCurrentNode->info);
+        }
+
+        idx++;
+        pCurrentNode = pCurrentNode->next;
+    }
 }
