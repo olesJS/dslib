@@ -5,6 +5,7 @@
 #include "ds_stack.h"
 #include "ds_queue.h"
 #include "ds_dequeue.h"
+#include "ds_bin_tree.h"
 
 typedef struct info_part {
     char *name;
@@ -12,8 +13,12 @@ typedef struct info_part {
 } INFO_PART;
 
 void printInfo(INFO_PART *elementInfo);
+void printInfoBTree(INFO_PART *elementInfo);
+
 void freeInfo(INFO_PART *elementInfo);
+
 int compareByAge(INFO_PART *key, INFO_PART *pNode);
+int compareByAgeForBinTree(INFO_PART *info1, INFO_PART *info2);
 
 int main() {
     // -----------------------------------------------
@@ -162,13 +167,49 @@ int main() {
     // 0. Henry - 23 years.
 
     clearDequeue(&pDequeue, freeInfo);  // pDequeue is NULL now
+    // -----------------------------------------------
+
+    // -----------------------------------------------
+    // "ds_bin_tree" LIBRARY USAGE EXAMPLE
+    // -----------------------------------------------
+    BinTree *pRoot;
+    initBinaryTree(&pRoot); // Initializing the binary tree
+
+    INFO_PART *tree_el_1 = malloc(sizeof(INFO_PART));
+    tree_el_1->name = strdup("Adil");
+    tree_el_1->age = 36;
+
+    INFO_PART *tree_el_2 = malloc(sizeof(INFO_PART));
+    tree_el_2->name = strdup("Mohammed");
+    tree_el_2->age = 24;
+
+    INFO_PART *tree_el_3 = malloc(sizeof(INFO_PART));
+    tree_el_3->name = strdup("Marcus");
+    tree_el_3->age = 45;
+
+    INFO_PART *tree_el_4 = malloc(sizeof(INFO_PART));
+    tree_el_4->name = strdup("Terry");
+    tree_el_4->age = 52;
+
+    addTreeNode(&pRoot, tree_el_1, compareByAgeForBinTree);
+    addTreeNode(&pRoot, tree_el_2, compareByAgeForBinTree);
+    addTreeNode(&pRoot, tree_el_3, compareByAgeForBinTree);
+
+    printBinTree(pRoot, 0, printInfoBTree); //    "Level" parameter must be initialized with 0
+
+    // -----------------------------------------------
 
     return 0;
 }
 
-// Custom function that prints the information part of stack/queue element
+// Custom function that prints the information part of stack/queue/dequeue element
 void printInfo(INFO_PART *elementInfo) {
     printf("%s - %d years.\n", elementInfo->name, elementInfo->age);
+}
+
+// Custom function that prints the information part of binary tree element
+void printInfoBTree(INFO_PART *elementInfo) {
+    printf("%s (%d)", elementInfo->name, elementInfo->age);
 }
 
 // Custom function that frees the allocated memory after information part of node
@@ -180,4 +221,9 @@ void freeInfo(INFO_PART *elementInfo) {
 // Custom comparison function
 int compareByAge(INFO_PART *key, INFO_PART *pNode) {
     return key->age == pNode->age;
+}
+
+// Custom comparison function of binary tree nodes
+int compareByAgeForBinTree(INFO_PART *info1, INFO_PART *info2) {
+    return info1->age - info2->age;
 }
