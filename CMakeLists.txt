@@ -10,4 +10,6 @@ add_executable(dslib main.c
         ds_queue.h
         ds_dequeue.c
         ds_dequeue.h
+        ds_bin_tree.c
+        ds_bin_tree.h
 )
