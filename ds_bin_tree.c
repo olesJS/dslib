@@ -59,22 +59,79 @@ void printBinTree(BinTree *pRootNode, int level, void (*printFunc)(void*)) {
 // -> a negative value (<0) if the first parameter is less tan the second one ->
 // -> a positive value (>0) if the first parameter is bigger than the second one
 // "neededInfo" parameter is the information part you are looking for
-BinTree* findTreeNode(BinTree **pRootNode, void *neededInfo, int (*cmpFunc)(void*, void*)) {
-    if (*pRootNode == NULL) return NULL;
+BinTree** findTreeNode(BinTree **pRootNode, void *neededInfo, int (*cmpFunc)(void*, void*)) {
+    if (*pRootNode == NULL) {
+        printf("\nERROR: FIND_TREE_NODE (ROOT NODE POINTER IS NULL)");
+        return NULL;
+    }
 
-    BinTree *pCurrentNode = *pRootNode;
+    BinTree **pCurrentNode = pRootNode;
 
     while (pCurrentNode != NULL) {
-        int result = cmpFunc(pCurrentNode->info, neededInfo);
+        int result = cmpFunc(neededInfo, (*pCurrentNode)->info);
 
         if (result == 0) return pCurrentNode;
 
         if (result < 0) {
-            pCurrentNode = pCurrentNode->left;
+            pCurrentNode = &((*pCurrentNode)->left);
         } else {
-            pCurrentNode = pCurrentNode->right;
+            pCurrentNode = &((*pCurrentNode)->right);
         }
     }
 
     return NULL; // not in the binary tree
+}
+
+// Deleting a node in BST
+// "freeFunc()" frees dynamic memory after information part of the binary tree node
+// "copyFunc()" creates and returns a copy of information part of node
+void deleteTreeNode(BinTree **pNodeToDelete, void (*freeFunc)(void*), void* (*copyFunc)(void*)) {
+    if (*pNodeToDelete == NULL) {
+        printf("\nERROR: DELETE_TREE_NODE (PASSED UNEXISTING NODE)\n");
+        return;
+    }
+
+    if ((*pNodeToDelete)->left == NULL && (*pNodeToDelete)->right == NULL) { // a leaf node
+        freeFunc((*pNodeToDelete)->info);
+        free(*pNodeToDelete);
+        *pNodeToDelete = NULL;
+        return;
+    }
+
+    if ((*pNodeToDelete)->left == NULL) { // has only right child
+        BinTree *tempNode = (*pNodeToDelete)->right;
+        freeFunc((*pNodeToDelete)->info);
+        free(*pNodeToDelete);
+        *pNodeToDelete = tempNode;
+        return;
+    }
+
+    if ((*pNodeToDelete)->right == NULL) { // has only left child
+        BinTree *tempNode = (*pNodeToDelete)->left;
+        freeFunc((*pNodeToDelete)->info);
+        free(*pNodeToDelete);
+        *pNodeToDelete = tempNode;
+        return;
+    }
+
+    // has two children
+    BinTree *pLeftSubtree = *pNodeToDelete;
+    BinTree *pLeftSubMax = (*pNodeToDelete)->left;
+
+    while (pLeftSubMax->right != NULL) {
+        pLeftSubtree = pLeftSubMax;
+        pLeftSubMax = pLeftSubMax->right;
+    }
+
+    freeFunc((*pNodeToDelete)->info);
+    (*pNodeToDelete)->info = copyFunc(pLeftSubMax->info);
+    freeFunc(pLeftSubMax->info);
+
+    if (pLeftSubtree == *pNodeToDelete) {
+        pLeftSubtree->left = pLeftSubMax->left;
+    } else {
+        pLeftSubtree->right = pLeftSubMax->left;
+    }
+
+    free(pLeftSubMax);
 }

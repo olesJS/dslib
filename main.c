@@ -20,6 +20,8 @@ void freeInfo(INFO_PART *elementInfo);
 int compareByAge(INFO_PART *key, INFO_PART *pNode);
 int compareByAgeForBinTree(INFO_PART *info1, INFO_PART *info2);
 
+INFO_PART* copyInfoPart(INFO_PART* oldInfo);
+
 int main() {
     // -----------------------------------------------
     // "ds_stack" LIBRARY USAGE EXAMPLE
@@ -191,11 +193,18 @@ int main() {
     tree_el_4->name = strdup("Terry");
     tree_el_4->age = 52;
 
-    addTreeNode(&pRoot, tree_el_1, compareByAgeForBinTree);
-    addTreeNode(&pRoot, tree_el_2, compareByAgeForBinTree);
-    addTreeNode(&pRoot, tree_el_3, compareByAgeForBinTree);
+    addTreeNode(&pRoot, tree_el_1, compareByAgeForBinTree);     // Adil (36)
+    addTreeNode(&pRoot, tree_el_2, compareByAgeForBinTree);     // Mohammed (24)
+    addTreeNode(&pRoot, tree_el_3, compareByAgeForBinTree);     // Marcus (45)
+    addTreeNode(&pRoot, tree_el_4, compareByAgeForBinTree);     // Terry (52)
 
     printBinTree(pRoot, 0, printInfoBTree); //    "Level" parameter must be initialized with 0
+
+    BinTree** nodeToDelete = findTreeNode(&pRoot, tree_el_4, compareByAgeForBinTree); // find Terry
+
+    printf("\n\nBST after deleting Terry from it:");
+    deleteTreeNode(nodeToDelete, freeInfo, copyInfoPart); // delete Terry from our BST
+    printBinTree(pRoot, 0, printInfoBTree);
 
     // -----------------------------------------------
 
@@ -226,4 +235,16 @@ int compareByAge(INFO_PART *key, INFO_PART *pNode) {
 // Custom comparison function of binary tree nodes
 int compareByAgeForBinTree(INFO_PART *info1, INFO_PART *info2) {
     return info1->age - info2->age;
+}
+
+// Creates new copy of INFO_PART variable
+INFO_PART* copyInfoPart(INFO_PART* oldInfo) {
+    if (oldInfo == NULL) return NULL;
+
+    INFO_PART* newInfo = malloc(sizeof(INFO_PART));
+    newInfo->age = oldInfo->age;
+    newInfo->name = malloc(sizeof(char) * (strlen(oldInfo->name) + 1));
+    strcpy(newInfo->name, oldInfo->name);
+
+    return newInfo;
 }
