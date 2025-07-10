@@ -135,3 +135,137 @@ void deleteTreeNode(BinTree **pNodeToDelete, void (*freeFunc)(void*), void* (*co
 
     free(pLeftSubMax);
 }
+
+// Deleting and clearing memory after all nodes of binary tree
+// The function is recursive and uses postorder traversal
+void clearBinaryTree(BinTree **pRootNode, void (*freeFunc)(void*)) {
+    if (*pRootNode == NULL) return;
+
+    clearBinaryTree(&(*pRootNode)->left, freeFunc);
+    clearBinaryTree(&(*pRootNode)->right, freeFunc);
+
+    freeFunc((*pRootNode)->info);
+    free(*pRootNode);
+    *pRootNode = NULL;
+}
+
+// Returns information part of node with minimal key in BST
+void* getMinValueBST(BinTree *pRootNode) {
+    if (pRootNode == NULL) return NULL;
+
+    BinTree *pCurrentNode = pRootNode;
+    while (pCurrentNode->left != NULL) pCurrentNode = pCurrentNode->left;
+
+    return pCurrentNode->info;
+}
+
+// Returns information part of node with maximal key in BST
+void* getMaxValueBST(BinTree *pRootNode) {
+    if (pRootNode == NULL) return NULL;
+
+    BinTree *pCurrentNode = pRootNode;
+    while (pCurrentNode->right != NULL) pCurrentNode = pCurrentNode->right;
+
+    return pCurrentNode->info;
+}
+
+// Recursively (inorder) counts number of nodes in binary tree
+void countNodesBST(BinTree *pRootNode, int *counter) {
+    if (pRootNode == NULL) return;
+
+    countNodesBST(pRootNode->left, counter);
+    (*counter)++;
+    countNodesBST(pRootNode->right, counter);
+}
+
+// Recursively (inorder) counts number of leaves in binary tree
+void countLeavesBST(BinTree *pRootNode, int *counter) {
+    if (pRootNode == NULL) return;
+
+    countLeavesBST(pRootNode->left, counter);
+    if (pRootNode->left == NULL && pRootNode->right == NULL) (*counter)++;
+    countLeavesBST(pRootNode->right, counter);
+}
+
+// Counts the height (depth) of binary tree
+int countHeightBST(BinTree *pRootNode) {
+    if (pRootNode == NULL) return 0;
+
+    int leftHeight = countHeightBST(pRootNode->left);
+    int rightHeight = countHeightBST(pRootNode->right);
+
+    return (leftHeight > rightHeight ? leftHeight : rightHeight) + 1;
+}
+
+// Checks if binary search tree is balanced or not
+int isBalancedBST(BinTree *pRootNode) {
+    if (pRootNode == NULL) return 1;
+
+    int leftHeight = countHeightBST(pRootNode->left);
+    int rightHeight = countHeightBST(pRootNode->right);
+
+    int difference = leftHeight - rightHeight;
+    if (difference > 1 || difference < -1) return 0;
+
+    return isBalancedBST(pRootNode->left) && isBalancedBST(pRootNode->right);
+}
+
+// Prints tree traversed inorder
+void inorderTraversalBST(BinTree *pRootNode, void (*printFunc)(void*)) {
+    if (pRootNode == NULL) return;
+
+    inorderTraversalBST(pRootNode->left, printFunc);
+    printFunc(pRootNode->info);
+    inorderTraversalBST(pRootNode->right, printFunc);
+}
+
+// Prints tree traversed preorder
+void preorderTraversalBST(BinTree *pRootNode, void (*printFunc)(void*)) {
+    if (pRootNode == NULL) return;
+
+    printFunc(pRootNode->info);
+    inorderTraversalBST(pRootNode->left, printFunc);
+    inorderTraversalBST(pRootNode->right, printFunc);
+}
+
+// Prints tree traversed postorder
+void postorderTraversalBST(BinTree *pRootNode, void (*printFunc)(void*)) {
+    if (pRootNode == NULL) return;
+
+    inorderTraversalBST(pRootNode->left, printFunc);
+    inorderTraversalBST(pRootNode->right, printFunc);
+    printFunc(pRootNode->info);
+}
+
+void storeInorder(BinTree **pRootNode, void** nodesList, int *idx, void* (*copyFunc)(void*)) {
+    if (*pRootNode == NULL) return;
+
+    storeInorder(&(*pRootNode)->left, nodesList, idx, copyFunc);
+    nodesList[(*idx)++] = copyFunc((*pRootNode)->info);
+    storeInorder(&(*pRootNode)->right, nodesList, idx, copyFunc);
+}
+
+BinTree* buildBalancedBST(void** nodesList, int startIdx, int endIdx) {
+    if (startIdx > endIdx) return NULL;
+
+    int midIdx = (startIdx + endIdx) / 2;
+    BinTree* pRoot = (BinTree*)malloc(sizeof(BinTree));
+    pRoot->info = nodesList[midIdx];
+
+    pRoot->left = buildBalancedBST(nodesList, startIdx, midIdx - 1);
+    pRoot->right = buildBalancedBST(nodesList, midIdx + 1, endIdx);
+
+    return pRoot;
+}
+
+BinTree* balanceBST(BinTree *pRoot, void* (*copyFunc)(void*)) {
+    int treeSize = 0;
+    countNodesBST(pRoot, &treeSize);
+
+    void** nodesList = malloc(sizeof(void*) * treeSize);
+
+    int idx = 0;
+    storeInorder(&pRoot, nodesList, &idx, copyFunc);
+
+    return buildBalancedBST(nodesList, 0, treeSize - 1);
+}
