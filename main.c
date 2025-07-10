@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ds_stack.h"
-#include "ds_queue.h"
-#include "ds_dequeue.h"
-#include "ds_bin_tree.h"
+#include "ds_stack.h"       // STACK library
+#include "ds_queue.h"       // QUEUE library
+#include "ds_dequeue.h"     // DEQUEUE library
+#include "ds_bin_tree.h"    // BINARY SEARCH TREE library
 
 typedef struct info_part {
     char *name;
@@ -193,6 +193,14 @@ int main() {
     tree_el_4->name = strdup("Terry");
     tree_el_4->age = 52;
 
+    INFO_PART *tree_el_5 = malloc(sizeof(INFO_PART));
+    tree_el_5->name = strdup("Stephen");
+    tree_el_5->age = 57;
+
+    INFO_PART *tree_el_6 = malloc(sizeof(INFO_PART));
+    tree_el_6->name = strdup("Cris");
+    tree_el_6->age = 63;
+
     addTreeNode(&pRoot, tree_el_1, compareByAgeForBinTree);     // Adil (36)
     addTreeNode(&pRoot, tree_el_2, compareByAgeForBinTree);     // Mohammed (24)
     addTreeNode(&pRoot, tree_el_3, compareByAgeForBinTree);     // Marcus (45)
@@ -200,12 +208,66 @@ int main() {
 
     printBinTree(pRoot, 0, printInfoBTree); //    "Level" parameter must be initialized with 0
 
+    /*
     BinTree** nodeToDelete = findTreeNode(&pRoot, tree_el_4, compareByAgeForBinTree); // find Terry
 
     printf("\n\nBST after deleting Terry from it:");
     deleteTreeNode(nodeToDelete, freeInfo, copyInfoPart); // delete Terry from our BST
     printBinTree(pRoot, 0, printInfoBTree);
+    */
 
+    INFO_PART *minVal = getMinValueBST(pRoot);
+    printf("\n\nMinimum value: ");
+    printInfo(minVal); // Minimum value: Mohammed - 24 years.
+
+    INFO_PART *maxVal = getMaxValueBST(pRoot);
+    printf("Maximum value: ");
+    printInfo(maxVal); // Maximum value: Marcus - 45 years.
+
+    int numberOfNodes = 0;
+    countNodesBST(pRoot, &numberOfNodes);
+    printf("\nNumber of nodes in the tree: %d", numberOfNodes); // Number of nodes in the tree: 3
+
+    int numberOfLeaves = 0;
+    countLeavesBST(pRoot, &numberOfLeaves);
+    printf("\nNumber of leaves in the tree: %d", numberOfLeaves); // Number of leaves in the tree: 2
+
+    printf("\n\nTree traversed inorder:\n");
+    inorderTraversalBST(pRoot, printInfo);
+
+    printf("\nTree traversed preorder:\n");
+    preorderTraversalBST(pRoot, printInfo);
+
+    printf("\nTree traversed postorder:\n");
+    postorderTraversalBST(pRoot, printInfo);
+
+    addTreeNode(&pRoot, tree_el_5, compareByAgeForBinTree);     // Stephen (57)
+    addTreeNode(&pRoot, tree_el_6, compareByAgeForBinTree);     // Cris (63)
+
+    printBinTree(pRoot, 0, printInfoBTree);
+
+    // BST before balancing (depth = 5):
+    //                                                        Cris (63)
+    //                                         Stephen (57)
+    //                          Terry (52)
+    //           Marcus (45)
+    // Adil (36)
+    //           Mohammed (24)
+
+    BinTree* pRebalancedRoot = balanceBST(pRoot, copyInfoPart);
+    printBinTree(pRebalancedRoot, 0, printInfoBTree);
+
+    // BST after balancing (depth = 3):
+    //                          Cris (63)
+    //           Stephen (57)
+    //                          Terry (52)
+    // Marcus (45)
+    //                          Adil (36)
+    //           Mohammed (24)
+
+
+    clearBinaryTree(&pRoot, freeInfo);
+    clearBinaryTree(&pRebalancedRoot, freeInfo);
     // -----------------------------------------------
 
     return 0;
@@ -242,8 +304,9 @@ INFO_PART* copyInfoPart(INFO_PART* oldInfo) {
     if (oldInfo == NULL) return NULL;
 
     INFO_PART* newInfo = malloc(sizeof(INFO_PART));
+
     newInfo->age = oldInfo->age;
-    newInfo->name = malloc(sizeof(char) * (strlen(oldInfo->name) + 1));
+    newInfo->name = malloc(sizeof(oldInfo->name));
     strcpy(newInfo->name, oldInfo->name);
 
     return newInfo;
