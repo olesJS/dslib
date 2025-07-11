@@ -6,6 +6,7 @@
 #include "ds_queue.h"       // QUEUE library
 #include "ds_dequeue.h"     // DEQUEUE library
 #include "ds_bin_tree.h"    // BINARY SEARCH TREE library
+#include "ds_hash_table.h"  // HASH TABLE library
 
 typedef struct info_part {
     char *name;
@@ -21,6 +22,12 @@ int compareByAge(INFO_PART *key, INFO_PART *pNode);
 int compareByAgeForBinTree(INFO_PART *info1, INFO_PART *info2);
 
 INFO_PART* copyInfoPart(INFO_PART* oldInfo);
+
+int firstHashCode(INFO_PART* infoPart);
+int secondHashCode(INFO_PART* infoPart);
+
+int newFirstHashCode(INFO_PART* infoPart);
+int newSecondHashCode(INFO_PART* infoPart);
 
 int main() {
     // -----------------------------------------------
@@ -208,13 +215,11 @@ int main() {
 
     printBinTree(pRoot, 0, printInfoBTree); //    "Level" parameter must be initialized with 0
 
-    /*
     BinTree** nodeToDelete = findTreeNode(&pRoot, tree_el_4, compareByAgeForBinTree); // find Terry
 
     printf("\n\nBST after deleting Terry from it:");
     deleteTreeNode(nodeToDelete, freeInfo, copyInfoPart); // delete Terry from our BST
     printBinTree(pRoot, 0, printInfoBTree);
-    */
 
     INFO_PART *minVal = getMinValueBST(pRoot);
     printf("\n\nMinimum value: ");
@@ -246,10 +251,9 @@ int main() {
 
     printBinTree(pRoot, 0, printInfoBTree);
 
-    // BST before balancing (depth = 5):
-    //                                                        Cris (63)
-    //                                         Stephen (57)
-    //                          Terry (52)
+    // BST before balancing (depth = 4):
+    //                                         Cris (63)
+    //                          Stephen (57)
     //           Marcus (45)
     // Adil (36)
     //           Mohammed (24)
@@ -260,7 +264,6 @@ int main() {
     // BST after balancing (depth = 3):
     //                          Cris (63)
     //           Stephen (57)
-    //                          Terry (52)
     // Marcus (45)
     //                          Adil (36)
     //           Mohammed (24)
@@ -270,12 +273,63 @@ int main() {
     clearBinaryTree(&pRebalancedRoot, freeInfo);
     // -----------------------------------------------
 
+    // -----------------------------------------------
+    // "ds_hash_table" LIBRARY USAGE EXAMPLE
+    // -----------------------------------------------
+    HASH_TABLE *pHashTable = initHashTable(13, 0.8, firstHashCode, secondHashCode);
+
+    INFO_PART *hash_el_1 = malloc(sizeof(INFO_PART));
+    hash_el_1->name = strdup("Adil");
+    hash_el_1->age = 36;
+
+    INFO_PART *hash_el_2 = malloc(sizeof(INFO_PART));
+    hash_el_2->name = strdup("Mohammed");
+    hash_el_2->age = 24;
+
+    INFO_PART *hash_el_3 = malloc(sizeof(INFO_PART));
+    hash_el_3->name = strdup("Marcus");
+    hash_el_3->age = 45;
+
+    INFO_PART *hash_el_4 = malloc(sizeof(INFO_PART));
+    hash_el_4->name = strdup("Terry");
+    hash_el_4->age = 52;
+
+    INFO_PART *hash_el_5 = malloc(sizeof(INFO_PART));
+    hash_el_5->name = strdup("Stephen");
+    hash_el_5->age = 57;
+
+    INFO_PART *hash_el_6 = malloc(sizeof(INFO_PART));
+    hash_el_6->name = strdup("Cris");
+    hash_el_6->age = 63;
+
+    addNewElementHT(pHashTable, hash_el_1);
+    addNewElementHT(pHashTable, hash_el_2);
+    addNewElementHT(pHashTable, hash_el_3);
+    addNewElementHT(pHashTable, hash_el_4);
+    addNewElementHT(pHashTable, hash_el_5);
+    addNewElementHT(pHashTable, hash_el_6);
+
+    printf("\n\nHASH TABLE (LOAD COEFF: %.2lf):", getLoadCoefficient(pHashTable));
+    printHashTable(pHashTable, printInfo);
+
+    deleteElementHT(pHashTable, hash_el_2, freeInfo); // hash_el_2 is NULL now
+
+    printf("\n\nHASH TABLE (LOAD COEFF: %.2lf):", getLoadCoefficient(pHashTable));
+    printHashTable(pHashTable, printInfo);
+
+    HASH_TABLE* pResizedTable = resizeHashTable(&pHashTable, 17, newFirstHashCode, newSecondHashCode, copyInfoPart, freeInfo);
+
+    printf("\n\nRESIZED HASH TABLE (LOAD COEF: %.2lf):", getLoadCoefficient(pResizedTable));
+    printHashTable(pResizedTable, printInfo);
+
+    deleteHashTable(&pResizedTable, freeInfo);
+    // -----------------------------------------------
     return 0;
 }
 
 // Custom function that prints the information part of stack/queue/dequeue element
 void printInfo(INFO_PART *elementInfo) {
-    printf("%s - %d years.\n", elementInfo->name, elementInfo->age);
+    printf("%s - %d years.", elementInfo->name, elementInfo->age);
 }
 
 // Custom function that prints the information part of binary tree element
@@ -310,4 +364,21 @@ INFO_PART* copyInfoPart(INFO_PART* oldInfo) {
     strcpy(newInfo->name, oldInfo->name);
 
     return newInfo;
+}
+
+// Hash functions
+int firstHashCode(INFO_PART* infoPart) {
+    return infoPart->age % 13;
+}
+
+int secondHashCode(INFO_PART* infoPart) {
+    return infoPart->age % 7;
+}
+
+int newFirstHashCode(INFO_PART* infoPart) {
+    return infoPart->age % 17;
+}
+
+int newSecondHashCode(INFO_PART* infoPart) {
+    return infoPart->age % 13;
 }
