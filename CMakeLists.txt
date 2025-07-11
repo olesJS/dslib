@@ -14,4 +14,5 @@ add_executable(dslib main.c
         ds_bin_tree.h
         ds_hash_table.c
         ds_hash_table.h
+        dslib.h
 )
